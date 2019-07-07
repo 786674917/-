@@ -1,0 +1,40 @@
+这周主要学习了一些数据分析的方法
+学会了画箱型图还有 pp图和qq图
+学习了运用主成分分析方法进行降维，练习代码如下
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+def meanX(dataX):
+    return np.mean(dataX,axis=0)#axis=0表示依照列来求均值。假设输入list,则axis=1
+def pca(XMat, k):
+    average = meanX(XMat) 
+    m, n = np.shape(XMat)
+    data_adjust = []
+    avgs = np.tile(average, (m, 1))
+    data_adjust = XMat - avgs
+    covX = np.cov(data_adjust.T)   #计算协方差矩阵
+    featValue, featVec=  np.linalg.eig(covX)  #求解协方差矩阵的特征值和特征向量
+    index = np.argsort(-featValue) #依照featValue进行从大到小排序
+    finalData = []
+    if k > n:
+        print ("k must lower than feature number")
+        return
+    else:
+        #注意特征向量时列向量。而numpy的二维矩阵(数组)a[m][n]中，a[1]表示第1行值
+        selectVec = np.matrix(featVec.T[index[:k]]) #所以这里须要进行转置
+        finalData = data_adjust * selectVec.T 
+        reconData = (finalData * selectVec) + average  
+    return finalData, reconData,featValue
+
+
+def MaxMinNormalization(x,Max,Min):
+    x = (x - Min) / (Max - Min);
+    return x
+
+
+X=pd.read_excel('C:/Users/Think/Desktop/red_wine.xlsx')
+Xmat=np.array(X)
+x1,x2,value=pca(Xmat,2)
+print(x1)
+print(MaxMinNormalization(value,np.max(value),np.min(value)))
+
